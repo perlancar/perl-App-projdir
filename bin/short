@@ -66,6 +66,9 @@ Then you can:
  % short missing
  % short missing -l
 
+ # add short name
+ % short add p5-Data-Format-Pretty-Console dfpc
+
 
 =head1 DESCRIPTION
 
