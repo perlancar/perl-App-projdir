@@ -1,0 +1,102 @@
+#!perl
+
+# DATE
+# VERSION
+
+use 5.010;
+use strict;
+use warnings;
+
+use Perinci::CmdLine::Any;
+
+my $prefix = "/App/short/";
+
+Perinci::CmdLine::Any->new(
+    url => "$prefix",
+    subcommands => {
+        ls    => { url => "${prefix}list_shorts" },
+    },
+)->run;
+
+# ABSTRACT: Manage short directory symlinks
+# PODNAME:
+
+=head1 SYNOPSIS
+
+Assuming you put your projects/repositories under C<~/repos>, e.g.:
+
+ perl-Text-ANSITable/
+ cpan-Perinci-Sub-Exporter/
+ p5-Data-Format-Pretty/
+ p5-Data-Format-Pretty-HTML/
+ p5-Data-Format-Pretty-JSON/
+ some-other-project/
+ yet-another-project/
+
+and you want to maintain a list of short symlink names in C<~/proj>, e.g.:
+
+ ansitable -> ../repos/perl-Text-ANSITable
+ perisexp -> ../repos/cpan-Perinci-Sub-Exporter
+ dfp -> ../repos/p5-Data-Format-Pretty
+ dfph -> ../repos/p5-Data-Format-Pretty-HTML
+ dfpj -> ../repos/p5-Data-Format-Pretty-JSON
+
+First, create C<~/.config/short.conf>:
+
+ long_dir  = ~/repos
+ short_dir = ~/proj
+
+ ; only include dirs in long_dir matching these regexes
+ long_include = ["^perl-", "^p5-", "^cpan-"]
+
+Then you can:
+
+ # list all project short names
+ % short ls
+ % short ls -l; # more detail
+
+ # list long names which do not have short symlinks yet
+ % short missing
+
+
+=head1 DESCRIPTION
+
+B<NOTE: EARLY IMPLEMENTATION, MORE SUBCOMMANDS AND OPTIONS WILL BE ADDED IN THE
+FUTURE.>
+
+Perl project directories (typically CPAN distributions, Git repositories)
+usually have rather long names, e.g.:
+
+ perl-Text-ANSITable
+ cpan-Perinci-Sub-Exporter
+ p5-Data-Format-Pretty
+ p5-Data-Format-Pretty-HTML
+ p5-Data-Format-Pretty-JSON
+
+In some places short single-word aliases are useful, e.g.:
+
+ ansitable
+ perisexp
+ dfp
+ dfph
+ dfpj
+
+Where is this useful? First, when typing or cd-ing the directory names (even
+though there is shell tab completion, we still often have to type the names):
+
+ % cd proj/dfph; # shorter than: cd repos/p5-Data-Format-Pretty-HTML
+
+Second is when referring in internal documents. Writing and reading the short
+names like C<dfpj> is much more convenient and faster (as long as they are
+already familiar) than having to explicitly write C<Data::Format::Pretty::JSON>
+every time. Especially if you, like me, have hundreds of projects and have to
+cross-reference one another when writing documentation, for example when writing
+todo lists:
+
+ * TODO dfp: Add support for more environment variables
+ * TODO perisexp: Support Sub::Exporter-style interface
+ * TODO ansitable: Optimize performance
+
+The short names are implemented as just symlinks to the real names. And this
+script is just a simple CLI tool to help you manage them. I've used symlinks
+since at least 2002-2003, and have only started writing this tool in March 2015.
