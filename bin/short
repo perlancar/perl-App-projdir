@@ -14,7 +14,10 @@ my $prefix = "/App/short/";
 Perinci::CmdLine::Any->new(
     url => "$prefix",
     subcommands => {
-        ls    => { url => "${prefix}list_shorts" },
+        ls      => { url => "${prefix}list_shorts" },
+        long    => { url => "${prefix}list_longs" },
+        missing => { url => "${prefix}list_missing" },
+        add     => { url => "${prefix}add_short" },
     },
 )->run;
 
@@ -51,12 +54,17 @@ First, create C<~/.config/short.conf>:
 
 Then you can:
 
- # list all project short names
+ # list all short names
  % short ls
  % short ls -l; # more detail
 
+ # list all long names
+ % short long
+ % short long -l
+
  # list long names which do not have short symlinks yet
  % short missing
+ % short missing -l
 
 
 =head1 DESCRIPTION

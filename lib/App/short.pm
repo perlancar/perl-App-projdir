@@ -6,6 +6,7 @@ package App::short;
 use 5.010001;
 use strict;
 use warnings;
+use Log::Any::IfLOG '$log';
 
 our %SPEC;
 
@@ -49,16 +50,52 @@ sub _get_my_home_dir {
     undef;
 }
 
-sub _preprocess_common_args {
+sub _common_args {
     my $args = shift;
+    my %res;
+    for (keys %common_args) {
+        $res{$_} = $args->{$_} if exists $args->{$_};
+    }
+    %res;
+}
+
+sub _validate {
+    my $args = shift;
+    return [200] if $args->{-validated};
 
     my $home = _get_my_home_dir() or die "Can't get homedir";
 
     # replace tilde (~) with home dir
-    for ($args->{short_dir}, $args->{long_dir}) {
-        s/\A~/$home/;
+    for (qw/short_dir long_dir/) {
+        if (defined $args->{$_}) {
+            $args->{$_} =~ s/\A~/$home/;
+        } else {
+            return [400, "Please specify $_"];
+        }
     }
+
+    # convert to regex
+    if ($args->{long_include}) {
+        for (@{ $args->{long_include} }) {
+            $_ = qr/$_/;
+        }
+    }
+
+    my @caller = caller(1);
+    my $func = $caller[3]; $func =~ s/.+:://;
+    if ($func eq 'add_short') {
+        return [400, "Invalid long name"] if $args->{long} =~ m![/\\]!;
+        return [400, "Invalid short name"] if $args->{short} =~ m![/\\]!;
+    }
+
+    $args->{-validated}++;
+    [200];
 }
+
+$SPEC{':package'} = {
+    v => 1.1,
+    summary => 'Manage short directory symlinks',
+};
 
 $SPEC{list_shorts} = {
     v => 1.1,
@@ -73,7 +110,8 @@ $SPEC{list_shorts} = {
 };
 sub list_shorts {
     my %args = @_;
-    _preprocess_common_args(\%args);
+    my $res = _validate(\%args);
+    return $res unless $res->[0] == 200;
 
     my $S = $args{short_dir};
 
@@ -87,6 +125,8 @@ sub list_shorts {
 
         my $target = readlink($path);
         $target =~ s!.+[/\\]!!;
+
+        # XXX check that target refers to $L
 
         my $broken = (-d $path) ? 0 : 1;
 
@@ -114,8 +154,197 @@ sub list_shorts {
     [200, "OK", \@res, \%resmeta];
 }
 
+$SPEC{list_longs} = {
+    v => 1.1,
+    args => {
+        %common_args,
+        %detail_l_arg,
+    },
+};
+sub list_longs {
+    my %args = @_;
+    my $res = _validate(\%args);
+    return $res unless $res->[0] == 200;
+
+    my $L = $args{long_dir};
+
+    my @res;
+    opendir my($dh), $L or
+        return [500, "Can't open dir $L: $!"];
+  ENTRY:
+    for my $ent (sort readdir($dh)) {
+        next if $ent eq '.' || $ent eq '..';
+        my $path = "$L/$ent";
+        next unless -d $path;
+
+      FILTER_INCLUDE:
+        {
+            if ($args{long_include}) {
+                for (@{ $args{long_include} }) {
+                    last FILTER_INCLUDE if $ent =~ $_;
+                }
+                next ENTRY;
+            }
+        }
+
+        push @res, {
+            name => $ent,
+        };
+    }
+
+    my %resmeta;
+    if ($args{detail}) {
+        $resmeta{format_options} = {
+            any => {table_column_orders=>[[qw/name/]]},
+        };
+    } else {
+        @res = map {$_->{name}} @res;
+    }
+
+    [200, "OK", \@res, \%resmeta];
+}
+
+$SPEC{list_missing} = {
+    v => 1.1,
+    args => {
+        %common_args,
+        %detail_l_arg,
+    },
+};
+sub list_missing {
+    use experimental 'smartmatch';
+
+    my %args = @_;
+    my $res = _validate(\%args);
+    return $res unless $res->[0] == 200;
+
+    my $S = $args{short_dir};
+    my $L = $args{long_dir};
+
+    my $res_s = list_shorts(_common_args(\%args), broken=>0, detail=>1);
+    my $res_l = list_longs(_common_args(\%args));
+
+    my @mentioned_longs = map {$_->{target}} @{$res_s->[2]};
+
+    my @res;
+    for (@{ $res_l->[2] }) {
+        next if $_ ~~ @mentioned_longs;
+        push @res, {
+            name => $_,
+        };
+    }
+
+    my %resmeta;
+    if ($args{detail}) {
+        $resmeta{format_options} = {
+            any => {table_column_orders=>[[qw/name/]]},
+        };
+    } else {
+        @res = map {$_->{name}} @res;
+    }
+
+    [200, "OK", \@res];
+}
+
+my $_completion_missing = sub {
+    require Complete::Util;
+
+    my %args = @_;
+    my $word    = $args{word} // '';
+    my $cmdline = $args{cmdline};
+    my $r       = $args{r};
+
+    return undef unless $cmdline;
+
+    $r->{read_config} = 1;
+    my $res = $cmdline->parse_argv($r);
+    return undef unless $res->[0] == 200;
+
+    my $fargs = $res->[2];
+
+    $res = _validate($fargs);
+    return undef unless $res->[0] == 200;
+
+    $res = list_missing(_common_args($fargs));
+    return undef unless $res->[0] == 200;
+
+    Complete::Util::complete_array_elem(
+        array=>$res->[2], word=>$word,
+    );
+};
+
+my $_completion_short = sub {
+    require Complete::Util;
+
+    my %args = @_;
+    my $word    = $args{word} // '';
+    my $cmdline = $args{cmdline};
+    my $r       = $args{r};
+
+    return undef unless $cmdline;
+
+    $r->{read_config} = 1;
+    my $res = $cmdline->parse_argv($r);
+    return undef unless $res->[0] == 200;
+
+    my $fargs = $res->[2];
+
+    $res = _validate($fargs);
+    return undef unless $res->[0] == 200;
+
+    $res = list_shorts(_common_args($fargs));
+    return undef unless $res->[0] == 200;
+
+    Complete::Util::complete_array_elem(
+        array=>$res->[2], word=>$word,
+    );
+};
+
+$SPEC{add_short} = {
+    v => 1.1,
+    args => {
+        %common_args,
+        long => {
+            schema => 'str*',
+            req => 1,
+            pos => 0,
+            completion => $_completion_missing,
+        },
+        short => {
+            schema => 'str*',
+            req => 1,
+            pos => 1,
+        },
+    },
+};
+sub add_short {
+    use experimental 'smartmatch';
+    require Cwd;
+    require File::Spec;
+
+    my %args = @_;
+    my $res = _validate(\%args);
+    return $res unless $res->[0] == 200;
+
+    my $S = $args{short_dir};
+    my $L = $args{long_dir};
+
+    return [404, "No such long name '$args{long}'"]
+        unless (-d "$L/$args{long}");
+    return [412, "Short name '$args{short}' already exists"]
+        if (-l "$S/$args{short}");
+
+    # XXX
+    symlink(File::Spec->abs2rel(
+        Cwd::abs_path("$L/$args{long}"),
+        Cwd::abs_path($S),
+    ), "$S/$args{short}") or return [500, "Can't create symlink: $!"];
+
+    [200, "OK"];
+}
+
 1;
-# ABSTRACT: Manage short directory symlinks
+# ABSTRACT:
 
 =head1 SYNOPSIS
 
