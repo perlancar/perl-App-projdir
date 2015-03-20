@@ -1,5 +1,13 @@
 Revision history for App-short
 
+0.02    2015-03-19 (PERLANCAR)
+
+        - Add subcommand: add.
+
+        - Add shell function and its completion function 'cds' to quickly cd to
+          a dir using short name.
+
+
 0.01    2015-03-19 (PERLANCAR)
 
         - First release.
