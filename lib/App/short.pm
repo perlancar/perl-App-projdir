@@ -33,6 +33,60 @@ our %detail_l_arg = (
     },
 );
 
+my $_completion_missing = sub {
+    require Complete::Util;
+
+    my %args = @_;
+    my $word    = $args{word} // '';
+    my $cmdline = $args{cmdline};
+    my $r       = $args{r};
+
+    return undef unless $cmdline;
+
+    $r->{read_config} = 1;
+    my $res = $cmdline->parse_argv($r);
+    return undef unless $res->[0] == 200;
+
+    my $fargs = $res->[2];
+
+    $res = _validate($fargs);
+    return undef unless $res->[0] == 200;
+
+    $res = list_missing(_common_args($fargs));
+    return undef unless $res->[0] == 200;
+
+    Complete::Util::complete_array_elem(
+        array=>$res->[2], word=>$word,
+    );
+};
+
+my $_completion_short = sub {
+    require Complete::Util;
+
+    my %args = @_;
+    my $word    = $args{word} // '';
+    my $cmdline = $args{cmdline};
+    my $r       = $args{r};
+
+    return undef unless $cmdline;
+
+    $r->{read_config} = 1;
+    my $res = $cmdline->parse_argv($r);
+    return undef unless $res->[0] == 200;
+
+    my $fargs = $res->[2];
+
+    $res = _validate($fargs);
+    return undef unless $res->[0] == 200;
+
+    $res = list_shorts(_common_args($fargs));
+    return undef unless $res->[0] == 200;
+
+    Complete::Util::complete_array_elem(
+        array=>$res->[2], word=>$word,
+    );
+};
+
 # (temporary) borrowed from PERLANCAR::Path::Util
 sub _get_my_home_dir {
     if ($^O eq 'Win32') {
@@ -83,9 +137,13 @@ sub _validate {
 
     my @caller = caller(1);
     my $func = $caller[3]; $func =~ s/.+:://;
-    if ($func eq 'add_short') {
-        return [400, "Invalid long name"] if $args->{long} =~ m![/\\]!;
-        return [400, "Invalid short name"] if $args->{short} =~ m![/\\]!;
+    if (1) { #$func eq 'add_short') {
+        if (defined $args->{long}) {
+            return [400, "Invalid long name"] if $args->{long} =~ m![/\\]!;
+        }
+        if (defined $args->{short}) {
+            return [400, "Invalid short name"] if $args->{short} =~ m![/\\]!;
+        }
     }
 
     $args->{-validated}++;
@@ -246,59 +304,38 @@ sub list_missing {
     [200, "OK", \@res];
 }
 
-my $_completion_missing = sub {
-    require Complete::Util;
+$SPEC{get_short_target} = {
+    v => 1.1,
+    args => {
+        %common_args,
+        short => {
+            schema => 'str*',
+            req => 1,
+            pos => 0,
+            completion => $_completion_short,
+        },
+    },
+};
+sub get_short_target {
+    require Cwd;
+    require File::Spec;
 
     my %args = @_;
-    my $word    = $args{word} // '';
-    my $cmdline = $args{cmdline};
-    my $r       = $args{r};
+    my $res = _validate(\%args);
+    return $res unless $res->[0] == 200;
 
-    return undef unless $cmdline;
+    my $S = $args{short_dir};
+    #my $L = $args{long_dir};
 
-    $r->{read_config} = 1;
-    my $res = $cmdline->parse_argv($r);
-    return undef unless $res->[0] == 200;
-
-    my $fargs = $res->[2];
-
-    $res = _validate($fargs);
-    return undef unless $res->[0] == 200;
-
-    $res = list_missing(_common_args($fargs));
-    return undef unless $res->[0] == 200;
-
-    Complete::Util::complete_array_elem(
-        array=>$res->[2], word=>$word,
-    );
-};
-
-my $_completion_short = sub {
-    require Complete::Util;
-
-    my %args = @_;
-    my $word    = $args{word} // '';
-    my $cmdline = $args{cmdline};
-    my $r       = $args{r};
-
-    return undef unless $cmdline;
-
-    $r->{read_config} = 1;
-    my $res = $cmdline->parse_argv($r);
-    return undef unless $res->[0] == 200;
-
-    my $fargs = $res->[2];
-
-    $res = _validate($fargs);
-    return undef unless $res->[0] == 200;
-
-    $res = list_shorts(_common_args($fargs));
-    return undef unless $res->[0] == 200;
-
-    Complete::Util::complete_array_elem(
-        array=>$res->[2], word=>$word,
-    );
-};
+    my $dir = readlink("$S/$args{short}");
+    return [200, "OK (not found)"] unless $dir;
+    $dir = Cwd::abs_path(
+        File::Spec->rel2abs(
+            $dir, Cwd::abs_path($S),
+        ));
+    return [200, "OK (can't abs_path)"] unless $dir;
+    [200, "OK", $dir];
+}
 
 $SPEC{add_short} = {
     v => 1.1,
@@ -334,7 +371,6 @@ sub add_short {
     return [412, "Short name '$args{short}' already exists"]
         if (-l "$S/$args{short}");
 
-    # XXX
     symlink(File::Spec->abs2rel(
         Cwd::abs_path("$L/$args{long}"),
         Cwd::abs_path($S),
