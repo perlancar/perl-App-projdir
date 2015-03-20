@@ -322,18 +322,19 @@ sub get_short_target {
 
     my %args = @_;
     my $res = _validate(\%args);
-    return $res unless $res->[0] == 200;
+    return [200,"Invalid input: $res->[0] - $res->[1]"]
+        unless $res->[0] == 200;
 
     my $S = $args{short_dir};
     #my $L = $args{long_dir};
 
     my $dir = readlink("$S/$args{short}");
-    return [200, "OK (not found)"] unless $dir;
+    return [200, "Short name not found"] unless $dir;
     $dir = Cwd::abs_path(
         File::Spec->rel2abs(
             $dir, Cwd::abs_path($S),
         ));
-    return [200, "OK (can't abs_path)"] unless $dir;
+    return [200, "Can't abs_path"] unless $dir;
     [200, "OK", $dir];
 }
 
