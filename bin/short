@@ -70,6 +70,21 @@ Then you can:
  # add short name
  % short add p5-Data-Format-Pretty-Console dfpc
 
+ # return long directory (return undef when short name is unknown)
+ % short get dfpc
+ /home/ujang/repos/p5-Data-Format-Pretty-Console
+ % cd `short get dfpc`
+
+Pro-tip: install this bash function to be able to cd quickly to a short
+directory (tab completion is also provided):
+
+# EXAMPLE: share/cds.bash
+
+Afterwards, you can:
+
+ % cds ans<tab>
+ % cds ansitable
+
 
 =head1 DESCRIPTION
 
