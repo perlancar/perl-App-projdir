@@ -1,5 +1,12 @@
 Revision history for App-short
 
+0.03    2015-03-21 (PERLANCAR)
+
+	- Add subcommand: rm.
+
+	- Add --query for ls.
+
+
 0.02    2015-03-19 (PERLANCAR)
 
         - Add subcommand: add.
