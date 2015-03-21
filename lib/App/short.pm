@@ -164,6 +164,11 @@ $SPEC{list_shorts} = {
             schema => 'bool',
             tags => ['category:filtering'],
         },
+        query => {
+            schema => 'str*',
+            tags => ['category:filtering'],
+            pos => 0,
+        },
     },
 };
 sub list_shorts {
@@ -172,6 +177,8 @@ sub list_shorts {
     return $res unless $res->[0] == 200;
 
     my $S = $args{short_dir};
+
+    my $q = lc($args{query} // '');
 
     my @res;
     opendir my($dh), $S or
@@ -191,6 +198,9 @@ sub list_shorts {
         # filter
         if (defined $args{broken}) {
             next if $args{broken} xor $broken;
+        }
+        if (length($q)) {
+            next unless index(lc($target), $q) >= 0 || index(lc($ent), $q) >= 0;
         }
 
         push @res, {
