@@ -19,6 +19,7 @@ Perinci::CmdLine::Any->new(
         missing => { url => "${prefix}list_missing" },
         add     => { url => "${prefix}add_short" },
         get     => { url => "${prefix}get_short_target" },
+        rm      => { url => "${prefix}rm_short" },
     },
 )->run;
 

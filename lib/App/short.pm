@@ -137,12 +137,14 @@ sub _validate {
 
     my @caller = caller(1);
     my $func = $caller[3]; $func =~ s/.+:://;
-    if (1) { #$func eq 'add_short') {
-        if (defined $args->{long}) {
-            return [400, "Invalid long name"] if $args->{long} =~ m![/\\]!;
-        }
-        if (defined $args->{short}) {
-            return [400, "Invalid short name"] if $args->{short} =~ m![/\\]!;
+    if (defined $args->{long}) {
+        return [400, "Invalid long name"] if $args->{long} =~ m![/\\]!;
+    }
+    if (defined $args->{short}) {
+        my @shorts = ref($args->{short}) eq 'ARRAY' ?
+            @{$args->{short}} : ($args->{short});
+        for (@shorts) {
+            return [400, "Invalid short name '$_'"] if m![/\\]!;
         }
     }
 
@@ -388,6 +390,45 @@ sub add_short {
     ), "$S/$args{short}") or return [500, "Can't create symlink: $!"];
 
     [200, "OK"];
+}
+
+$SPEC{rm_short} = {
+    v => 1.1,
+    args => {
+        %common_args,
+        short => {
+            schema => ['array*', of=>'str*', min_len=>1],
+            req => 1,
+            pos => 0,
+            greedy => 1,
+            element_completion => $_completion_short,
+        },
+    },
+};
+sub rm_short {
+    require Perinci::Object;
+
+    my %args = @_;
+    my $res = _validate(\%args);
+    return $res unless $res->[0] == 200;
+
+    my $S = $args{short_dir};
+
+    my $envres = Perinci::Object::envresmulti();
+
+    for my $s (@{ $args{short} }) {
+        my $path = "$S/$s";
+
+        if (!(-l $path)) {
+            $envres->add_result(404, "Short name not found", {item_id=>$s});
+        } elsif (!unlink($path)) {
+            $envres->add_result(500, "Can't unlink: $!", {item_id=>$s});
+        } else {
+            $envres->add_result(200, "OK", {item_id=>$s});
+        }
+    }
+
+    $envres->as_struct;
 }
 
 1;
