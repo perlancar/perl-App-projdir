@@ -8,6 +8,10 @@ use strict;
 use warnings;
 use Log::Any::IfLOG '$log';
 
+# just for testing DZP:Preload
+use constant PRELOAD => $ENV{PRELOAD};
+# INSERT_PRELOADS: PRELOAD
+
 our %SPEC;
 
 our %common_args = (
@@ -34,7 +38,7 @@ our %detail_l_arg = (
 );
 
 my $_completion_missing = sub {
-    require Complete::Util;
+    require Complete::Util; #PRELOAD
 
     my %args = @_;
     my $word    = $args{word} // '';
@@ -61,7 +65,7 @@ my $_completion_missing = sub {
 };
 
 my $_completion_short = sub {
-    require Complete::Util;
+    require Complete::Util; #PRELOAD
 
     my %args = @_;
     my $word    = $args{word} // '';
@@ -329,8 +333,8 @@ $SPEC{get_short_target} = {
     },
 };
 sub get_short_target {
-    require Cwd;
-    require File::Spec;
+    require Cwd; #PRELOAD
+    require File::Spec; #PRELOAD
 
     my %args = @_;
     my $res = _validate(\%args);
@@ -369,8 +373,8 @@ $SPEC{add_short} = {
 };
 sub add_short {
     use experimental 'smartmatch';
-    require Cwd;
-    require File::Spec;
+    require Cwd; #PRELOAD
+    require File::Spec; #PRELOAD
 
     my %args = @_;
     my $res = _validate(\%args);
@@ -406,7 +410,7 @@ $SPEC{rm_short} = {
     },
 };
 sub rm_short {
-    require Perinci::Object;
+    require Perinci::Object; #PRELOAD
 
     my %args = @_;
     my $res = _validate(\%args);
