@@ -1,5 +1,19 @@
 Revision history for App-short
 
+0.06    2015-05-15 (PERLANCAR)
+
+        - No functional changes.
+
+        - Re-upload.
+
+
+0.05    2015-05-15 (PERLANCAR)
+
+        - No functional changes.
+
+        - Tweak dist.ini, rebuild with newer Preinci::CmdLine::Any::Build.
+
+
 0.04    2015-05-15 (PERLANCAR)
 
 	- No functional changes.
