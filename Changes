@@ -1,5 +1,12 @@
 Revision history for App-short
 
+0.07    2015-05-15 (PERLANCAR)
+
+        - No functional changes.
+
+        - [build] Use Perinci::CmdLine::Any::Lumped 0.08.
+
+
 0.06    2015-05-15 (PERLANCAR)
 
         - No functional changes.
@@ -11,7 +18,7 @@ Revision history for App-short
 
         - No functional changes.
 
-        - Tweak dist.ini, rebuild with newer Preinci::CmdLine::Any::Build.
+        - Tweak dist.ini, rebuild with newer Perinci::CmdLine::Any::Build.
 
 
 0.04    2015-05-15 (PERLANCAR)
