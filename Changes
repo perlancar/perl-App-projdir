@@ -1,5 +1,13 @@
 Revision history for App-short
 
+0.04    2015-05-15 (PERLANCAR)
+
+	- No functional changes.
+
+	- Try replacing dep to Perinci::CmdLine::Any with
+	  Perinci::CmdLine::Any::Bundled.
+
+
 0.03    2015-03-21 (PERLANCAR)
 
 	- Add subcommand: rm.
