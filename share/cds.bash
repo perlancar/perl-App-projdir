@@ -10,7 +10,7 @@ cds ()
 _cds ()
 {
     local cur=${COMP_WORDS[COMP_CWORD]}
-    COMPREPLY=( $(compgen -W "`short ls`" -- "$cur") )
+    COMPREPLY=( `COMP_LINE="short get $cur" COMP_POINT=$[10+${#cur}] short` )
 }
 
 # activate tab completion
