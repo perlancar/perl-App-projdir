@@ -218,9 +218,7 @@ sub list_shorts {
 
     my %resmeta;
     if ($args{detail}) {
-        $resmeta{format_options} = {
-            any => {table_column_orders=>[[qw/name target is_broken/]]},
-        };
+        $resmeta{'table.fields'} = [qw/name target is_broken/];
     } else {
         @res = map {$_->{name}} @res;
     }
@@ -268,9 +266,7 @@ sub list_longs {
 
     my %resmeta;
     if ($args{detail}) {
-        $resmeta{format_options} = {
-            any => {table_column_orders=>[[qw/name/]]},
-        };
+        $resmeta{'table.fields'} = [qw/name/];
     } else {
         @res = map {$_->{name}} @res;
     }
@@ -310,9 +306,7 @@ sub list_missing {
 
     my %resmeta;
     if ($args{detail}) {
-        $resmeta{format_options} = {
-            any => {table_column_orders=>[[qw/name/]]},
-        };
+        $resmeta{'table.fields'} = [qw/name/];
     } else {
         @res = map {$_->{name}} @res;
     }
