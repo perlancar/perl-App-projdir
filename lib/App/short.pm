@@ -314,6 +314,50 @@ sub list_missing {
     [200, "OK", \@res];
 }
 
+$SPEC{list_duplicates} = {
+    v => 1.1,
+    args => {
+        %common_args,
+        %detail_l_arg,
+    },
+};
+sub list_duplicates {
+    use experimental 'smartmatch';
+
+    my %args = @_;
+    my $res = _validate(\%args);
+    return $res unless $res->[0] == 200;
+
+    my $S = $args{short_dir};
+    my $L = $args{long_dir};
+
+    my $res_s = list_shorts(_common_args(\%args), broken=>0, detail=>1);
+
+    my %mentioned_longs;
+    for my $e (@{ $res_s->[2] }) {
+        push @{ $mentioned_longs{ $e->{target} } }, $e->{name};
+    }
+
+    my @res;
+    for (sort keys %mentioned_longs) {
+        my $names = $mentioned_longs{$_};
+        next unless @$names > 1;
+        push @res, {
+            target => $_,
+            names => join(", ", @$names),
+        };
+    }
+
+    my %resmeta;
+    if ($args{detail}) {
+        $resmeta{'table.fields'} = [qw/target names/];
+    } else {
+        @res = map {$_->{target}} @res;
+    }
+
+    [200, "OK", \@res, \%resmeta];
+}
+
 $SPEC{get_short_target} = {
     v => 1.1,
     args => {

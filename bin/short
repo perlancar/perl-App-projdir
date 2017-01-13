@@ -14,12 +14,13 @@ my $prefix = "/App/short/";
 Perinci::CmdLine::Any->new(
     url => "$prefix",
     subcommands => {
-        ls      => { url => "${prefix}list_shorts" },
-        long    => { url => "${prefix}list_longs" },
-        missing => { url => "${prefix}list_missing" },
-        add     => { url => "${prefix}add_short" },
-        get     => { url => "${prefix}get_short_target" },
-        rm      => { url => "${prefix}rm_short" },
+        ls        => { url => "${prefix}list_shorts" },
+        long      => { url => "${prefix}list_longs" },
+        missing   => { url => "${prefix}list_missing" },
+        duplicate => { url => "${prefix}list_duplicates" },
+        add       => { url => "${prefix}add_short" },
+        get       => { url => "${prefix}get_short_target" },
+        rm        => { url => "${prefix}rm_short" },
     },
 )->run;
 
