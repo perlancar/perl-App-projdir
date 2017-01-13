@@ -1,3 +1,9 @@
+0.10    2017-01-13 (PERLANCAR)
+
+	- Add subcommand: duplicate (to list long directories that have
+	  more than one shorts).
+
+
 0.09    2015-09-12 (PERLANCAR)
 
 	- Allow cds completion to do fuzzy matching.
