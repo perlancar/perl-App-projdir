@@ -121,26 +121,6 @@ sub _validate {
     my $args = shift;
     return [200] if $args->{-validated};
 
-    my $home = _get_my_home_dir() or die "Can't get homedir";
-
-    # replace tilde (~) with home dir
-    for (qw/short_dir long_dir/) {
-        if (defined $args->{$_}) {
-            $args->{$_} =~ s/\A~/$home/;
-        } else {
-            return [400, "Please specify $_"];
-        }
-    }
-
-    # convert to regex
-    if ($args->{long_include}) {
-        for (@{ $args->{long_include} }) {
-            $_ = qr/$_/;
-        }
-    }
-
-    my @caller = caller(1);
-    my $func = $caller[3]; $func =~ s/.+:://;
     if (defined $args->{long}) {
         return [400, "Invalid long name"] if $args->{long} =~ m![/\\]!;
     }
