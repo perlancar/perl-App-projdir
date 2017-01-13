@@ -1,3 +1,11 @@
+0.12    2017-01-13 (PERLANCAR)
+
+        - No functional changes.
+
+        - [dist] Force upgrade of Perinci::CmdLine::Lite to 1.71 (to get
+          implicit path encoding).
+
+
 0.11    2017-01-13 (PERLANCAR)
 
 	- Remove manual ~ prefix resolving in directory arguments because
