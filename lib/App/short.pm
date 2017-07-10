@@ -6,7 +6,7 @@ package App::short;
 use 5.010001;
 use strict;
 use warnings;
-use Log::Any::IfLOG '$log';
+use Log::ger;
 
 # just for testing DZP:Preload
 use constant PRELOAD => $ENV{PRELOAD};
