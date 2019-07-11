@@ -1,11 +1,11 @@
-0.14    2017-07-10 (PERLANCAR)
+0.14    2017-07-10  Released-By: PERLANCAR
 
 	- No functional changes.
 
 	- Replace Log::Any with Log::ger.
 
 
-0.13    2017-01-13 (PERLANCAR)
+0.13    2017-01-13  Released-By: PERLANCAR
 
         - No functional changes.
 
@@ -13,7 +13,7 @@
           config filenames in POD).
 
 
-0.12    2017-01-13 (PERLANCAR)
+0.12    2017-01-13  Released-By: PERLANCAR
 
         - No functional changes.
 
@@ -21,24 +21,24 @@
           implicit path encoding).
 
 
-0.11    2017-01-13 (PERLANCAR)
+0.11    2017-01-13  Released-By: PERLANCAR
 
 	- Remove manual ~ prefix resolving in directory arguments because
 	  they are now handled by Config::IOD::Reader 0.31+.
 
 
-0.10    2017-01-13 (PERLANCAR)
+0.10    2017-01-13  Released-By: PERLANCAR
 
 	- Add subcommand: duplicate (to list long directories that have
 	  more than one shorts).
 
 
-0.09    2015-09-12 (PERLANCAR)
+0.09    2015-09-12  Released-By: PERLANCAR
 
 	- Allow cds completion to do fuzzy matching.
 
 
-0.08    2015-06-13 (PERLANCAR)
+0.08    2015-06-13  Released-By: PERLANCAR
 
         - No functional changes.
 
@@ -46,28 +46,28 @@
           Back to using regular Perinci::CmdLine::Any distribution.
 
 
-0.07    2015-05-15 (PERLANCAR)
+0.07    2015-05-15  Released-By: PERLANCAR
 
         - No functional changes.
 
         - [build] Use Perinci::CmdLine::Any::Lumped 0.08.
 
 
-0.06    2015-05-15 (PERLANCAR)
+0.06    2015-05-15  Released-By: PERLANCAR
 
         - No functional changes.
 
         - Re-upload.
 
 
-0.05    2015-05-15 (PERLANCAR)
+0.05    2015-05-15  Released-By: PERLANCAR
 
         - No functional changes.
 
         - Tweak dist.ini, rebuild with newer Perinci::CmdLine::Any::Build.
 
 
-0.04    2015-05-15 (PERLANCAR)
+0.04    2015-05-15  Released-By: PERLANCAR
 
 	- No functional changes.
 
@@ -75,14 +75,14 @@
 	  Perinci::CmdLine::Any::Bundled (UPDATE: now ::Lumped).
 
 
-0.03    2015-03-21 (PERLANCAR)
+0.03    2015-03-21  Released-By: PERLANCAR
 
 	- Add subcommand: rm.
 
 	- Add --query for ls.
 
 
-0.02    2015-03-19 (PERLANCAR)
+0.02    2015-03-19  Released-By: PERLANCAR
 
         - Add subcommand: add.
 
@@ -90,6 +90,6 @@
           a dir using short name.
 
 
-0.01    2015-03-19 (PERLANCAR)
+0.01    2015-03-19  Released-By: PERLANCAR
 
         - First release.
